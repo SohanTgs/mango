@@ -1,0 +1,185 @@
+{% extends 'admin/layouts/app.html' %}
+{% load static %}
+
+{% block panel %} 
+    <div class="row">
+        <div class="col-md-12"> 
+            <div class="card">
+                <form action="" method="POST">
+                    {% csrf_token %} 
+                    <div class="card-body">
+                        <div class="form-row">
+                            <div class="form-group col-md-6">
+                                <label class="mb-4">Email Send Method</label>
+                                <select name="sms_method" class="form-control">
+                                    <option value="nexmo" 
+                                        {% if general.sms.sms_method == 'nexmo' %} 
+                                            selected 
+                                        {% endif %}
+                                        >Nexmo
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-6 text-right">
+                                <h6 class="mb-4">&nbsp;</h6>
+                                <button type="button" data-target="#testSMSModal" data-toggle="modal" class="btn btn--info">Send Test SMS</button>
+                            </div>
+                        </div>
+                        <div class="form-row mt-4 d-none configForm" id="clickatell">
+                            <div class="col-md-12">
+                                <h6 class="mb-2">Clickatell Configuration</h6>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label class="font-weight-bold">Api Key <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Api Key" name="clickatell_api_key" value=""/>
+                            </div>
+                        </div>
+                        <div class="form-row mt-4 d-none configForm" id="infobip">
+                            <div class="col-md-12">
+                                <h6 class="mb-2">Infobip Configuration</h6>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Username <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Username" name="infobip_username" value=""/>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Password <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Password" name="infobip_password" value=""/>
+                            </div>
+                        </div>
+                        <div class="form-row mt-4 d-none configForm" id="messageBird">
+                            <div class="col-md-12">
+                                <h6 class="mb-2">Message Bird Configuration</h6>
+                            </div>
+                            <div class="form-group col-md-12">
+                                <label class="font-weight-bold">Api Key <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Api Key" name="message_bird_api_key" value=""/>
+                            </div>
+                        </div>
+                        <div class="form-row mt-4 d-none configForm" id="nexmo">
+                            <div class="col-md-12">
+                                <h6 class="mb-2">Nexmo Configuration</h6>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Api Key <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Api Key" name="nexmo_api_key" value="{{ general.sms.nexmo_api_key }}"/>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Api Secret <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Api Secret" name="nexmo_api_secret" value="{{ general.sms.nexmo_api_secret }}"/>
+                            </div>
+                        </div>
+                        <div class="form-row mt-4 d-none configForm" id="smsBroadcast">
+                            <div class="col-md-12">
+                                <h6 class="mb-2">Sms Broadcast Configuration</h6>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Username <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Username" name="sms_broadcast_username" value=""/>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Password <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Password" name="sms_broadcast_password" value=""/>
+                            </div>
+                        </div>
+                        <div class="form-row mt-4 d-none configForm" id="twilio">
+                            <div class="col-md-12">
+                                <h6 class="mb-2">Twilio Configuration</h6>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold">Account SID <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Account SID" name="account_sid" value=""/>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold">Auth Token <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Auth Token" name="auth_token" value=""/>
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label class="font-weight-bold">From Number <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="From Number" name="from" value=""/>
+                            </div>
+                        </div>
+                        <div class="form-row mt-4 d-none configForm" id="textMagic">
+                            <div class="col-md-12">
+                                <h6 class="mb-2">Text Magic Configuration</h6>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Username <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Username" name="text_magic_username" value=""/>
+                            </div>
+                            <div class="form-group col-md-6">
+                                <label class="font-weight-bold">Apiv2 Key <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" placeholder="Apiv2 Key" name="apiv2_key" value=""/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-block btn--primary mr-2">Update</button>
+                    </div>
+                </form>
+            </div><!-- card end -->
+        </div>
+
+
+    </div>
+
+
+    <div id="testSMSModal" class="modal fade" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Test SMS Setup</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{% url 'admin.send.test.sms' %}" method="POST">
+                   {% csrf_token %} 
+                    <input type="hidden" name="id">
+                    <div class="modal-body">
+                        <div class="form-row">
+                            <div class="form-group col-md-12">
+                                <label>Sent to <span class="text-danger">*</span></label>
+                                <input type="text" name="mobile" class="form-control" placeholder="Moble">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn--dark" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn--success">Send</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+{% block script %} 
+    <script>
+        (function ($) {
+            "use strict";
+            
+            var method = '{{ general.sms.sms_method }}';
+
+            if (!method) {
+                method = 'clickatell';
+            }
+
+            smsMethod(method);
+            $('select[name=sms_method]').on('change', function() {
+                var method = $(this).val();
+                smsMethod(method);
+            });
+
+            function smsMethod(method){
+                $('.configForm').addClass('d-none');
+                if(method != 'php') {
+                    $(`#${method}`).removeClass('d-none');
+                }
+            }
+
+        })(jQuery);
+
+    </script>
+{% endblock %}
