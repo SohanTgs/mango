@@ -34,6 +34,7 @@ urlpatterns = [
     path('admin/sms/setting/', views.smsSetting, name='admin.sms.setting'),
     path('admin/sms/configure', views.smsConfigure, name='admin.sms.configure'),
     path('admin/custom/asset', views.customAsset, name='admin.custom.asset'),
+    path('admin/screen/record', views.screenRecord, name='admin.screen.record'),
 
     path('admin/', admin.site.urls),
 

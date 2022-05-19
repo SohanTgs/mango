@@ -390,6 +390,14 @@ def sendTestSms(request):
 		return Back(request)
 
 
+@login_required(login_url='admin:login')
+def screenRecord(request):
+
+	contents = {
+		'pageTitle':'Screen Record'
+	}
+
+	return render(request, 'admin/setting/screen_record.html', contents)
 
 
 

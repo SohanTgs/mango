@@ -1,0 +1,230 @@
+{% extends 'admin/layouts/app.html' %}
+{% load static %}
+
+{% block panel %}  
+    <div class="row mb-none-30">
+        <div class="col-lg-12 col-md-12 mb-30">
+            <div class="card">
+                <div class="card-body">
+              
+                    <div class="left">
+                      <div id="startButton" class="button">
+                        Start
+                      </div>
+                      <h2>Preview</h2>
+                      <video id="preview" width="300" height="200" autoplay muted></video>
+                    </div>
+                    <div class="right">
+                      <div id="stopButton" class="button">
+                        Stop
+                      </div>
+                      <h2>Recording</h2>
+                      <video id="recording" width="300" height="200" controls></video>
+                      <a id="downloadButton" class="button">
+                        Download
+                      </a>
+                    </div>
+                    <div class="bottom">
+                      <pre id="log"></pre>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+ 
+{% block style %}
+<style>
+video {
+  margin-top: 2px;
+  border: 1px solid black;
+}
+
+.button {
+  cursor: pointer;
+  display: block;
+  width: 160px;
+  border: 1px solid black;
+  font-size: 16px;
+  text-align: center;
+  padding-top: 2px;
+  padding-bottom: 4px;
+  color: white;
+  background-color: darkgreen;
+  text-decoration: none;
+}
+
+h2 {
+  margin-bottom: 4px;
+}
+
+.left {
+  margin-right: 10px;
+  float: left;
+  width: 300px;
+  padding: 0px;
+}
+
+.right {
+  margin-left: 10px;
+  float: left;
+  width: 160px;
+  padding: 0px;
+}
+
+.bottom {
+  clear: both;
+  padding-top: 10px;
+}
+</style>
+{% endblock %}
+
+{% block script %}
+    <script>
+
+    "use strict";
+           
+        let preview = document.getElementById("preview");
+        let recording = document.getElementById("recording");
+        let startButton = document.getElementById("startButton");
+        let stopButton = document.getElementById("stopButton");
+        let downloadButton = document.getElementById("downloadButton");
+        let logElement = document.getElementById("log");
+
+        let recordingTimeMS = 100000;
+        function log(msg) {
+          logElement.innerHTML += msg + "\n";
+        }
+        function wait(delayInMS) {
+          return new Promise(resolve => setTimeout(resolve, delayInMS));
+        }
+        function startRecording(stream, lengthInMS) {
+          let recorder = new MediaRecorder(stream);
+          let data = [];
+         
+          recorder.ondataavailable = event => data.push(event.data);
+
+            recorder.addEventListener('stop', function(){
+              let blob = new Blob(data, {
+                  type: data[0].type
+              })
+              let url = URL.createObjectURL(blob)
+
+              // let video = document.querySelector("video");
+              // video.src = url;
+
+              // let a = document.createElement('a');
+              // a.href = url
+              // a.download = 'video.webm'
+              // a.click();
+
+            downloadButton.href = url;
+            recording.src = url;
+            downloadButton.download = "RecordedVideo.webm";
+          })
+
+          recorder.start();
+          log(recorder.state + " for " + (lengthInMS/1000) + " seconds...");
+         
+          let stopped = new Promise((resolve, reject) => {
+            recorder.onstop = resolve;
+            recorder.onerror = event => reject(event.name);
+          });
+
+          let recorded = wait(lengthInMS).then(
+            () => recorder.state == "recording" && recorder.stop()
+          );
+         
+          return Promise.all([
+            stopped,
+            recorded
+          ])
+          .then(() => data);
+        }
+        function stop(stream) {
+          stream.getTracks().forEach(track => track.stop());
+        }
+        startButton.addEventListener("click", function() {
+          navigator.mediaDevices.getDisplayMedia({
+            video: true,
+            audio: true
+          }).then(stream => {
+            preview.srcObject = stream;
+            downloadButton.href = stream;
+            preview.captureStream = preview.captureStream || preview.mozCaptureStream;
+            return new Promise(resolve => preview.onplaying = resolve);
+          }).then(() => startRecording(preview.captureStream(), recordingTimeMS))
+          .then (recordedChunks => {
+            let recordedBlob = new Blob(recordedChunks, { type: "video/webm" });
+            recording.src = URL.createObjectURL(recordedBlob);
+            downloadButton.href = recording.src;
+            downloadButton.download = "RecordedVideo.webm";
+            
+            log("Successfully recorded " + recordedBlob.size + " bytes of " +
+                recordedBlob.type + " media.");
+          })
+          .catch(log);
+        }, false);stopButton.addEventListener("click", function() {
+          stop(preview.srcObject);
+        }, false);
+    </script>
+{% endblock %}
+
+
+
+<!-- <!DOCTYPE html>
+<html>
+  <head>
+    <title>Parcel Sandbox</title>
+    <meta charset="UTF-8" />
+  </head>
+  <body>
+    <video class="video" width="600px" controls></video>
+    <button class="record-btn">record</button>
+
+ <script>
+let btn = document.querySelector(".record-btn")
+
+btn.addEventListener("click", async function () {
+  let stream = await navigator.mediaDevices.getDisplayMedia({
+    video: true,
+    audio: true
+  });
+
+  //needed for better browser support
+  const mime = MediaRecorder.isTypeSupported("video/webm; codecs=vp9") 
+             ? "video/webm; codecs=vp9" 
+             : "video/webm"
+    let mediaRecorder = new MediaRecorder(stream, {
+        mimeType: mime
+    })
+
+    let chunks = []
+    mediaRecorder.addEventListener('dataavailable', function(e) {
+        chunks.push(e.data)
+    })
+
+    mediaRecorder.addEventListener('stop', function(){
+
+      let blob = new Blob(chunks, {
+          type: chunks[0].type
+      })
+      let url = URL.createObjectURL(blob)
+
+      let video = document.querySelector("video")
+      video.src = url
+
+      let a = document.createElement('a')
+      a.href = url
+      a.download = 'video.webm'
+      a.click()
+  })
+
+    //we have to start the recorder manually
+    mediaRecorder.start()
+})
+</script>
+  </body>
+</html> -->
+
